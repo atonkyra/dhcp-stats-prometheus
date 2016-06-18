@@ -28,23 +28,41 @@ parser.add_argument('-l6', '--dhcp6-leases', required=False, help='dhcp6 leases 
 args = parser.parse_args()
 
 def exec_command(args):
+    logger.info(' '.join(args))
     p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     return out.decode('ascii', errors='ignore')
 
 @route('/metrics')
 def prometheus_metrics():
-    dhcpstat = json.loads(exec_command([args.binary, '-c', args.dhcp4_config, '-l', args.dhcp4_leases, '-f', 'j']))
-    dhcp6stat = json.loads(exec_command([args.binary, '-c', args.dhcp6_config, '-l', args.dhcp6_leases, '-f', 'j']))
+    dhcpstat = {'shared-networks': []}
+    dhcp6stat = {'shared-networks': []}
+    try:
+        dhcpstat = json.loads(exec_command([args.binary, '-c', args.dhcp4_config, '-l', args.dhcp4_leases, '-f', 'j']))
+    except:
+        pass
+    try:
+        dhcp6stat = json.loads(exec_command([args.binary, '-c', args.dhcp6_config, '-l', args.dhcp6_leases, '-f', 'j']))
+    except:
+        pass
     data = []
     for shared_network in dhcpstat['shared-networks']:
         data.append('dhcp_pool_used{ip_version="%s",network="%s"} %s' % (4,shared_network['location'],shared_network['used']))
         data.append('dhcp_pool_free{ip_version="%s",network="%s"} %s' % (4,shared_network['location'],shared_network['free']))
-        data.append('dhcp_pool_usage{ip_version="%s",network="%s"} %s' % (4,shared_network['location'],float(shared_network['used'])/float(shared_network['defined'])))
+        defined_leases = float(shared_network['defined'])
+        leases_used_percentage = 0
+        if defined_leases > 0:
+            leases_used_percentage = float(shared_network['used'])/defined_leases
+        data.append('dhcp_pool_usage{ip_version="%s",network="%s"} %s' % (4,shared_network['location'],leases_used_percentage))
     for shared_network in dhcp6stat['shared-networks']:
         data.append('dhcp_pool_used{ip_version="%s",network="%s"} %s' % (6,shared_network['location'],shared_network['used']))
         data.append('dhcp_pool_free{ip_version="%s",network="%s"} %s' % (6,shared_network['location'],shared_network['free']))
+        defined_leases = float(shared_network['defined'])
+        leases_used_percentage = 0
+        if defined_leases > 0:
+            leases_used_percentage = float(shared_network['used'])/defined_leases
         data.append('dhcp_pool_usage{ip_version="%s",network="%s"} %s' % (6,shared_network['location'],float(shared_network['used'])/float(shared_network['defined'])))
+        data.append('dhcp_pool_usage{ip_version="%s",network="%s"} %s' % (6,shared_network['location'],leases_used_percentage))
     response.content_type = 'text/plain'
     return '%s\n' % ('\n'.join(data))
 
