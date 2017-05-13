@@ -93,4 +93,4 @@ def prometheus_metrics():
     response.content_type = 'text/plain'
     return '%s\n' % ('\n'.join(data))
 
-run(host=args.listen_address, port=9991)
+run(host=args.listen_address, port=args.listen_port)
