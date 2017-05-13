@@ -88,7 +88,6 @@ def prometheus_metrics():
         leases_used_percentage = 0
         if defined_leases > 0:
             leases_used_percentage = float(shared_network['used'])/defined_leases
-        data.append('dhcp_pool_usage{ip_version="%s",network="%s"} %s' % (6,shared_network['location'],float(shared_network['used'])/float(shared_network['defined'])))
         data.append('dhcp_pool_usage{ip_version="%s",network="%s"} %s' % (6,shared_network['location'],leases_used_percentage))
     response.content_type = 'text/plain'
     return '%s\n' % ('\n'.join(data))
