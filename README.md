@@ -3,7 +3,7 @@ Prometheus exporter for DHCP stats, uses dhcpd-pools to fetch stats. I have incl
 
 You may acquire dhcpd-pools from http://dhcpd-pools.sourceforge.net/ for your own compiling needs. Debian stretch also seems to include a version of dhcpd-pools.
 
-## Usage
+## Usage (use -h or --help argument for help)
 ```
 ./dhcp-stats-prometheus.py -R 10.0.0.1 -R fd00:1337::1 -p 12331 -b /usr/bin/dhcpd-pools
 ```
