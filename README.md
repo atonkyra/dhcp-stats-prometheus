@@ -3,6 +3,11 @@ Prometheus exporter for DHCP stats, uses dhcpd-pools to fetch stats. I have incl
 
 You may acquire dhcpd-pools from http://dhcpd-pools.sourceforge.net/ for your own compiling needs. Debian stretch also seems to include a version of dhcpd-pools.
 
+## Usage
+```
+./dhcp-stats-prometheus.py -R 10.0.0.1 -R fd00:1337::1 -p 12331 -b /usr/bin/dhcpd-pools
+```
+
 ## Configuring ISC-DHCP server and interpreting results
 dhcpd.conf should be split into shared-network declarations to get sane names for the subnets, see example below:
 ```
